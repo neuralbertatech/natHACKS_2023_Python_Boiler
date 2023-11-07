@@ -12,7 +12,8 @@ import sys
 import time
 from dataclasses import dataclass
 
-from Board import Board, get_board_id
+from Board import Board, get_board_id, SIMULATE
+from fixation_cross import FixationCrossBuilder
 from utils.save_to_csv import save_to_csv
 
 import statistics as stats
@@ -35,10 +36,6 @@ from Board import PILL
 
 from typing import NoReturn
 
-SIMULATE = 0
-FILE = 1
-LIVESTREAM = 2
-
 from PyQt6 import QtWidgets
 from PyQt6.QtCore import QPoint
 from PyQt6.QtCore import Qt
@@ -53,101 +50,6 @@ from typing import NoReturn
 from typing import Tuple
 
 ###########################################################
-
-class FixationCross(QtWidgets.QWidget):
-    def __init__(
-        self, parent=None, width: int = 100, thickness: int = 10, color: str = "red"
-    ) -> NoReturn:
-        super(FixationCross, self).__init__(parent)
-        self.width = width
-        self.thickness = thickness
-        self.color = color
-
-    def paintEvent(self, event) -> NoReturn:
-        painter = QPainter(self)
-        painter.setPen(QPen(QColor(self.color), 8, Qt.PenStyle.SolidLine))
-        painter.setBrush(QBrush(QColor(self.color), Qt.BrushStyle.SolidPattern))
-
-        points = FixationCross.get_points(self.get_center(), self.width, self.thickness)
-        qt_points = [QPoint(p[0], p[1]) for p in points]
-        poly = QPolygon(qt_points)
-        painter.drawPolygon(poly)
-
-    def get_center(self) -> Tuple[int, int]:
-        width = self.frameGeometry().width()
-        height = self.frameGeometry().height()
-        return (width // 2, height // 2)
-
-    # A cross with a cross_width of 15 and a line_thickness of 5. The center
-    #   is marked by 'X' and the points start at '0' and end at 'B'
-    #
-    #    line_thickness
-    #       .--^--.
-    #       |     |
-    #                    -.
-    #        2---3        |
-    #        |   |        |
-    #        |   |        |
-    #        |   |        |
-    #        |   |        |
-    #   0----1   4----5   |
-    #   |             |   |
-    #   |      X      |   > cross_width
-    #   |             |   |
-    #   B----A   7----6   |
-    #        |   |        |
-    #        |   |        |
-    #        |   |        |
-    #        |   |        |
-    #        9---8        |
-    #                    -.
-    #
-    @staticmethod
-    def get_points(
-        center: Tuple[int, int], cross_width: int, line_thickness: int
-    ) -> List[Tuple[int, int]]:
-        x = center[0]
-        y = center[1]
-        hw = cross_width // 2
-        ht = line_thickness // 2
-        return [
-            (x - hw, y - ht),  # 0
-            (x - ht, y - ht),  # 1
-            (x - ht, y - hw),  # 2
-            (x + ht, y - hw),  # 3
-            (x + ht, y - ht),  # 4
-            (x + hw, y - ht),  # 5
-            (x + hw, y + ht),  # 6
-            (x + ht, y + ht),  # 7
-            (x + ht, y + hw),  # 8
-            (x - ht, y + hw),  # 9
-            (x - ht, y + ht),  # A
-            (x - hw, y + ht),  # B
-        ]
-
-
-class FixationCrossBuilder:
-    def __init__(self) -> NoReturn:
-        self.width = 100
-        self.thickness = 10
-        self.color = "red"
-
-    def build(self) -> FixationCross:
-        return FixationCross(
-            width=self.width, thickness=self.thickness, color=self.color
-        )
-
-    def set_width(self, width: int) -> FixationCrossBuilder:
-        self.width = width
-        return self
-
-    def set_thickness(self, thickness: int) -> FixationCrossBuilder:
-        self.thickness = thickness
-        return self
-
-    def set_color(self, color: str) -> FixationCrossBuilder:
-        self.color = color
-        return self
 
 class OddballTaskDialog(QDialog):
     def __init__(self):
@@ -174,10 +76,12 @@ class OddballTask(QWidget):
         
         self.__init_qt_window()
         self.__init_layout()
+        self.__setup_board()
         if not self.__show_popup_dialog():
             self.close()
             return
 
+        self.__setup_loop_variables()
         self.__start_task()
 
     def __init_qt_window(self) -> NoReturn:
@@ -197,12 +101,59 @@ class OddballTask(QWidget):
         #self.layout.addWidget(self.green_cross)
         self.setLayout(self.layout)
 
+    def __setup_board(self) -> NoReturn:
+        self.board = Board(data_type=SIMULATE)
+
     def __show_popup_dialog(self) -> bool:
         dialog = OddballTaskDialog()
         return dialog.exec()
 
+    def __setup_loop_variables(self) -> NoReturn:
+        self.current_iteration = 0
+        self.total_iterations = 20
+        self.oddball_chance = 0.2
+
     def __start_task(self) -> NoReturn:
-        pass
+        self.timer = QTimer()
+        self.timer.timeout.connect(self.show_stimulus)
+        self.timer.start(1000)
+        self.hide_timer = QTimer()
+        self.hide_timer.setSingleShot(True)
+        self.hide_timer.setInterval(250)
+        self.hide_timer.timeout.connect(self.hide_all_stimulus)
+        self.data_read_timer = QTimer()
+        self.data_read_timer.timeout.connect(self.read_new_data)
+        self.data_read_timer.start(10)
+
+    def read_new_data(self) -> NoReturn:
+        for datum in self.board.get_new_data():
+            if datum is not None and len(datum) > 0:
+                print(f"Collected data point {datum}")
+
+    def show_stimulus(self) -> NoReturn:
+        if self.current_iteration >= self.total_iterations:
+            self.timer.stop()
+            return
+
+        self.current_iteration += 1
+        if random.random() <= self.oddball_chance:
+            self.__oddball_stimulus()
+        else:
+            self.__normal_stimulus()
+
+        self.hide_timer.start()
+
+
+    def hide_all_stimulus(self) -> NoReturn:
+        self.__hide_stimulus(self.red_cross)
+        self.__hide_stimulus(self.green_cross)
+        
+
+    def __normal_stimulus(self) -> NoReturn:
+        self.__show_stimulus(self.green_cross)
+
+    def __oddball_stimulus(self) -> NoReturn:
+        self.__show_stimulus(self.red_cross)
 
     def __hide_stimulus(self, stimulus: QWidget) -> NoReturn:
         stimulus.setParent(None)
