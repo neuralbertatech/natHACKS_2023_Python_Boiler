@@ -67,13 +67,11 @@ class Board(BoardShim):
         num_points=None,
         manual_mode=False,
     ):
-
         # Establish parameters
         self.params = BrainFlowInputParams()
+
         # set board id based on parameters only if it wasn't given to us
-        self.board_id = board_id
-        if self.board_id is None:
-            self.board_id = get_board_id(data_type, hardware, model)
+        self.board_id = board_id if board_id is not None else get_board_id(data_type, hardware, model)
 
         # Ensure board_id was set correctly
         assert (
@@ -97,14 +95,6 @@ class Board(BoardShim):
         # Brainflow Init
         self.hardware = hardware
         self.model = model
-
-        # set board id based on parameters only if it wasn't given to us
-        self.board_id = board_id
-        if self.board_id is None:
-            self.board_id = get_board_id(data_type, hardware, model)
-        assert (
-            self.board_id is not None
-        ), "Error: Undefined combination of arguments passed to 'get_board_id'"
 
         if num_points == None:
             self.sampling_rate = BoardShim.get_sampling_rate(self.board_id)

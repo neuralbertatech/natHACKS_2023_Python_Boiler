@@ -17,44 +17,29 @@ Project ideas: any project where the user sees something displayed and interacts
 """
 
 import sys
-import time
-import csv
-import random
-import os
 
-from PyQt5 import QtGui
-from PyQt5.QtOpenGL import *
-from PyQt5 import QtCore, Qt
-from PyQt5.QtCore import QTimer
-from PyQt5.QtWidgets import *
-from PyQt5.QtGui import QPainter, QBrush, QPen, QPolygon
-import numpy as np
+from PyQt6 import QtGui
+from PyQt6 import QtCore
+from PyQt6.QtWidgets import QWidget
+from PyQt6.QtWidgets import QGridLayout
+from PyQt6.QtWidgets import QLabel
+from PyQt6.QtWidgets import QPushButton
+from PyQt6.QtWidgets import QApplication
 
-import logging
-import asyncio
-import platform
-import ast
-
-# use bleak version 0.1.12 for mac
-
-# import CoreBluetooth
-from bleak import BleakClient
-from bleak import BleakScanner
-from bleak import discover
-
-
-class ard_mac_on(QWidget):
+class ArduinoMacos(QWidget):
     def __init__(self, parent=None, arduino_port=None):
-        super().__init__()
+        super().__init__(parent)
 
-        self.parent = parent
         self.arduino_port = arduino_port
+        self.width = 600
+        self.height = 600
+        self.logo = "../utils/logo_icon.jpg"
+        self.title = "Arduino Testing Window"
 
-        self.setMinimumSize(600, 600)
-        self.setWindowIcon(QtGui.QIcon("utils/logo_icon.jpg"))
-
-        # setting window title
-        self.setWindowTitle("Arduino Testing Window")
+        # Configure the window
+        self.setMinimumSize(self.width, self.height)
+        self.setWindowIcon(QtGui.QIcon(self.logo))
+        self.setWindowTitle(self.title)
 
         # init layout
         self.layout = QGridLayout()
@@ -76,7 +61,7 @@ class ard_mac_on(QWidget):
         # set up a button to activate / deactivate the arduino
         self.arduino_button = QPushButton("Activate Arduino")
         self.arduino_button.setEnabled(True)
-        self.layout.addWidget(self.arduino_button, 4, 0, 1, -1, QtCore.Qt.AlignHCenter)
+        self.layout.addWidget(self.arduino_button, 4, 0, 1, -1, QtCore.Qt.AlignmentFlag.AlignHCenter)
         self.arduino_button.clicked.connect(self.activate_arduino)
 
         # This values was randomly generated - it must match between the Central and Peripheral devices
@@ -97,6 +82,6 @@ class ard_mac_on(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = ard_turn_on()
+    win = ArduinoMacos()
     win.show()
     sys.exit(app.exec())

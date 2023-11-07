@@ -1,3 +1,4 @@
+#!/usr/bin/env python
 """
 This is the right task
 - it displays either a blue or green circle and records when user hits space
@@ -26,28 +27,27 @@ Madeleine
 
 """
 
-import csv
 import logging
 import random
 import sys
 import time
 
-import numpy as np
-from brainflow.board_shim import BoardIds, BoardShim, BrainFlowInputParams
-from brainflow.data_filter import DataFilter, FilterTypes
-from PyQt5 import Qt, QtCore, QtGui
-from PyQt5.QtCore import QTimer  # Qt,
-from PyQt5.QtGui import QBrush, QFont, QPainter, QPen, QPolygon
-from PyQt5.QtOpenGL import *
-from PyQt5.QtWidgets import *
+from brainflow.board_shim import BoardShim
+from brainflow.board_shim import BoardIds
+from brainflow.board_shim import BrainFlowInputParams
+from PyQt5 import Qt
+from PyQt5 import QtCore
+from PyQt5 import QtGui
+from PyQt5.QtCore import QTimer
+from PyQt5.QtGui import QBrush
+from PyQt5.QtGui import QFont
+from PyQt5.QtGui import QPainter
+from PyQt5.QtWidgets import QWidget
+from PyQt5.QtWidgets import QGridLayout
+from PyQt5.QtWidgets import QLabel
+from PyQt5.QtWidgets import QApplication
 
-from Board import CONNECT, Board, get_board_id
-
-# from PyQt5 import QWidget
-
-
-# from multiprocessing import Process, Queue
-# from utils.pyqt5_widgets import MplCanvas
+from Board import Board, get_board_id
 
 
 log_file = "boiler.log"
@@ -67,29 +67,28 @@ logger.addHandler(stdout)
 logger.info("Program started at {}".format(time.time()))
 
 
-class baseline_win(QWidget):
+class BaselineWindow(QWidget):
     def __init__(
         self,
+        csv_name,
         hardware=None,
         model=None,
         sim_type=None,
         data_type=None,
-        csv_name=None,
         parent=None,
         serial_port=None,
         board_id=None,
+        enable_debug=False
     ):
-        super().__init__()
+        super().__init__(parent)
 
-        self.parent = parent
         self.sim_type = sim_type
         self.hardware = hardware
         self.model = model
         self.data_type = data_type
-
-        self.csv_name = csv_name[:-4] + "_" + str(int(time.time())) + ".csv"
-
-        parent.csv_name_final = self.csv_name
+        self.csv_name = csv_name + "_" + str(int(time.time())) + ".csv"
+        self.com_port = None
+        self.board_id = board_id if board_id is not None else get_board_id(self.data_type, self.hardware, self.model)
 
         # Brainflow Init
         self.params = BrainFlowInputParams()
@@ -97,15 +96,8 @@ class baseline_win(QWidget):
 
         self.data = []
 
-        if self.parent.debug == True:
+        if enable_debug is True:
             BoardShim.enable_dev_board_logger()
-
-        self.com_port = None
-
-        if board_id == None:
-            self.board_id = get_board_id(self.data_type, self.hardware, self.model)
-        else:
-            self.board_id = board_id
 
         self.setMinimumSize(600, 600)
         self.setWindowIcon(QtGui.QIcon("utils/logo_icon.jpg"))
@@ -129,7 +121,11 @@ class baseline_win(QWidget):
         self.stim_str = ["Left Arm", "Right Arm"]
 
         # let's start eeg receiving!
-        self.board = Board(board_id=self.board_id)
+        board_parameters = BrainFlowInputParams()
+        board_parameters.serial_port = serial_port
+        self.board = BoardShim(board_id=self.board_id, input_params=board_parameters)
+        self.board.prepare_session()
+        self.board.start_stream()
         self.hardware_connected = True
 
         # now we can init stuff for our trials
@@ -308,6 +304,6 @@ class baseline_win(QWidget):
 
 if __name__ == "__main__":
     app = QApplication(sys.argv)
-    win = baseline_win()
-    win.show(csv_name="baseline.csv", board_id=1, serial_port="COM3")
+    win = BaselineWindow(csv_name="baseline", board_id=BoardIds.MUSE_2_BLED_BOARD, serial_port="/dev/ttyACM1")
+    win.show()
     sys.exit(app.exec())

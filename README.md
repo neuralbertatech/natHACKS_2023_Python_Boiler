@@ -28,9 +28,9 @@ python -m venv <Environment-Name>  # For example  $ python -m venv python_boiler
 ```
 
 Activate the virtual environment and install the dependencies (Platform-Specific):
-#### Linux / MacOS (??????)
+#### Linux / MacOS
 ```sh
-./<Environment-Name>/Scripts/activate  # ./python_boiler/Scripts/activate
+source ./<Environment-Name>/bin/activate  # ./python_boiler/bin/activate
 pip install -r requirements.txt
 ```
 
