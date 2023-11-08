@@ -106,7 +106,7 @@ logger.info("Program started at {}".format(time.time()))
 
 # from spectrograph import spectrograph_gui
 
-from baseline_window import baseline_win
+from baseline_window import BaselineWindow
 
 # results not implemented yet
 from graph_window import graph_win
@@ -118,7 +118,7 @@ if False:  # debugging... remebeber to put the tf imports back in session_window
 if sys.platform == "win32":
     from arduino_windows import ard_wind_on as ard_turn_on
 else:
-    from arduino_mac import ard_mac_on as ard_turn_on
+    from arduino_mac import ArduinoMacos as ard_turn_on
 
 
 # let's make a menu window class
@@ -153,7 +153,7 @@ class MenuWindow(QMainWindow):
 
         # self.setStyleSheet("background-color: gray;")
         # setting window title and icon
-        self.setWindowTitle("PyQt5 Menu")
+        self.setWindowTitle("PyQt6 Menu")
         self.setWindowIcon(QtGui.QIcon("utils/logo_icon.jpg"))
 
         # init layout
@@ -550,7 +550,7 @@ class MenuWindow(QMainWindow):
         """Opens the baseline window, moves program control over."""
         if self.checks_for_window_creation():
             logger.info("MenuWindow is creating baseline window")
-            self.baseline_window = baseline_win(
+            self.baseline_window = BaselineWindow(
                 parent=self,
                 board_id=self.board_id,
                 csv_name=self.csv_name,
