@@ -18,8 +18,8 @@ This is a collection of tools created to help jumpstart users on working with BC
 
 Clone the repository:
 ```sh
-git clone https://github.com/neuralbertatech/natHACKS_2022_Python_Boiler
-cd natHACKS_2022_Python_Boiler
+git clone https://github.com/neuralbertatech/natHACKS_2023_Python_Boiler
+cd natHACKS_2023_Python_Boiler
 ```
 
 Create a virtual environment to install the dependencies:
@@ -59,22 +59,22 @@ INFO:MenuWindow:Program started at 1656990995.4310365
 Logger: GraphWindow: INFO at: 2022-07-04 21:16:35,457, line 28: Program started at 1656990995.4570363
 INFO:GraphWindow:Program started at 1656990995.4570363
 Traceback (most recent call last):
-  File ".\natHACKS_2022_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\bgapi\bgapi.py", line 32, in <module>
+  File ".\natHACKS_2023_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\bgapi\bgapi.py", line 32, in <module>
     import termios
 ModuleNotFoundError: No module named 'termios'
 
 During handling of the above exception, another exception occurred:
 
 Traceback (most recent call last):
-  File ".\natHACKS_2022_Python_Boiler\main_menu.py", line 104, in <module>
+  File ".\natHACKS_2023_Python_Boiler\main_menu.py", line 104, in <module>
     from arduino_windows import ard_wind_on as ard_turn_on
-  File .\natHACKS_2022_Python_Boiler\arduino_windows.py", line 4, in <module>
+  File .\natHACKS_2023_Python_Boiler\arduino_windows.py", line 4, in <module>
     import pygatt
-  File ".\natHACKS_2022_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\__init__.py", line 14, in <module>
+  File ".\natHACKS_2023_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\__init__.py", line 14, in <module>
     from .backends import BGAPIBackend, GATTToolBackend, BLEAddressType  # noqa
-  File ".\natHACKS_2022_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\__init__.py", line 2, in <module>
+  File ".\natHACKS_2023_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\__init__.py", line 2, in <module>
     from .bgapi.bgapi import BGAPIBackend  # noqa
-  File ".\natHACKS_2022_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\bgapi\bgapi.py", line 36, in <module>
+  File ".\natHACKS_2023_Python_Boiler\test_python_boiler\lib\site-packages\pygatt\backends\bgapi\bgapi.py", line 36, in <module>
     BGAPIError, serial.serialutil.SerialException)
 AttributeError: module 'serial' has no attribute 'serialutil'
 ```
