@@ -1,6 +1,6 @@
 <img src="https://neuralberta.tech/images/event/natHACKs/nathanGlow.png" height="250">
 
-# NATHacks 2022 - Python Boiler
+# natHACKS 2023 - Python Boiler
 
 This is a collection of tools created to help jumpstart users on working with BCI hardware.
 
